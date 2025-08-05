@@ -1,11 +1,16 @@
-
-const fetch = require('node-fetch');
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs/promises';
+import fetch from 'node-fetch';
+import path from 'path';
 
 async function main() {
-  // TikTok Creative Center endpoint
+  // 1) Figure out output path (test.json if provided, otherwise date-named file)
+  const [,, outputArg] = process.argv;
+  const outputPath = outputArg || `data/emojis-${new Date().toISOString().slice(0,10)}.json`;
+
+  // 2) The correct TikTok Creative Center endpoint
   const url = 'https://www.tiktok.com/business/creativecenter/api/inspiration/popular/trending?country=US&days=1';
+
+  // 3) Fetch JSON (with a real browser UA)
   const res = await fetch(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0',
@@ -13,18 +18,12 @@ async function main() {
     }
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
+
+  // 4) Write to disk
   const json = await res.json();
-
-  // Build filename with today’s date
-  const today = new Date().toISOString().slice(0, 10);
-  const fileName = `emojis-${today}.json`;
-  const outPath = path.join('data', fileName);
-
-  // Ensure data folder exists, then write file
-  fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  fs.writeFileSync(outPath, JSON.stringify(json, null, 2));
-
-  console.log('Wrote', outPath);
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+  await fs.writeFile(outputPath, JSON.stringify(json, null, 2), 'utf8');
+  console.log(`Wrote ${outputPath}`);
 }
 
 main().catch(err => {
