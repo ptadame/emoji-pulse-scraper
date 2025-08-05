@@ -5,8 +5,13 @@ const path = require('path');
 async function main() {
   // TikTok Creative Center endpoint
   const url = 'https://www.tiktok.com/business/creativecenter/api/inspiration/popular/trending?country=US&days=1';
-  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' } });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0',
+      'Accept': 'application/json'
+    }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
   const json = await res.json();
 
   // Build filename with today’s date
