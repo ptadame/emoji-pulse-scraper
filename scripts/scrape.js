@@ -1,32 +1,27 @@
-#!/usr/bin/env node
-
 const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
 
-async function main(outputPath) {
-  // ← TikTok endpoint for daily trending
-  const url = 'https://ads.tiktok.com/business/creativecenter/inspiration/popular/trending?cursor=0&count=100';
-  const res = await fetch(url, {
-    headers: { 'Accept': 'application/json' }
-  });
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status} fetching ${url}`);
-  }
+async function main() {
+  // TikTok Creative Center endpoint
+  const url = 'https://www.tiktok.com/business/creativecenter/api/inspiration/popular/trending?country=US&days=1';
+  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const json = await res.json();
 
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  fs.writeFileSync(outputPath, JSON.stringify(json, null, 2), 'utf8');
-  console.log(`Wrote ${outputPath}`);
+  // Build filename with today’s date
+  const today = new Date().toISOString().slice(0, 10);
+  const fileName = `emojis-${today}.json`;
+  const outPath = path.join('data', fileName);
+
+  // Ensure data folder exists, then write file
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, JSON.stringify(json, null, 2));
+
+  console.log('Wrote', outPath);
 }
 
-const [ , , outputPath ] = process.argv;
-if (!outputPath) {
-  console.error('Usage: node scripts/scrape.js <outputPath>');
-  process.exit(1);
-}
-
-main(outputPath).catch(err => {
+main().catch(err => {
   console.error(err);
   process.exit(1);
 });
