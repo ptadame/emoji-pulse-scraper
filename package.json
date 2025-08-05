@@ -1,0 +1,12 @@
+{
+  "name": "emoji-pulse-scraper",
+  "version": "1.0.0",
+  "description": "Daily TikTok emoji scraper",
+  "main": "scripts/scrape.js",
+  "scripts": {
+    "scrape": "node scripts/scrape.js data/emojis-$(date +%F).json"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+}
